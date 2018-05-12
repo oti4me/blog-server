@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/php:7.1.5-browsers
+      - image: circleci/php:7.1-browsers
     working_directory: ~/repo
 
     steps:
@@ -15,7 +15,12 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
+      - run:
+          name: Install Composer
+          command: curl -sS https://getcomposer.org/installer | sudo php  -- --install-dir=/usr/local/bin --filename=composer
+
       - run: composer install -n --prefer-dist
+
 
       - save_cache:
           paths:
@@ -23,4 +28,5 @@ jobs:
           key: v1-dependencies-{{ checksum "composer.json" }}
         
       # run tests!
-      - run: phpunit
+      - run: ./vendor/bin/phpunit
+      
