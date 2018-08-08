@@ -12,6 +12,7 @@
 */
 
 $router->post('/api/v1/signup', 'UsersController@signup');
+$router->post('/api/v1/signin', 'UsersController@signin');
 
 $router->get('/', function () use ($router) {
   return $router->app->version();
