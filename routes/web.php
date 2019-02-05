@@ -11,10 +11,13 @@
 |
 */
 
-$router->post('/api/v1/signup', 'UsersController@signup');
-$router->post('/api/v1/signin', 'UsersController@signin');
-
 $router->get('/', function () use ($router) {
   return $router->app->version();
 });
 
+$router->post('/api/v1/signup', 'UsersController@signup');
+$router->post('/api/v1/signin', 'UsersController@signin');
+
+$router->group(['middleware' => 'auth'], function () use ($router) {
+  $router->post('/api/v1/posts', 'PostsController@add');
+});
