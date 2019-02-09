@@ -11,9 +11,15 @@
 |
 */
 
-$factory->define(App\User::class, function (Faker\Generator $faker) {
+$factory->define(App\Models\User::class, function (Faker\Generator $faker) {
+
+    $name = explode(" ", $faker->name);
+
     return [
-        'name' => $faker->name,
+        'firstName' => $name[0],
+        'lastName' => $name[1],
         'email' => $faker->email,
+        'phone' => $faker->phoneNumber,
+        'password' => app('hash')->make($name[0]),
     ];
 });
