@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
+use App\helpers\AuthHelpers;
+
 class Authenticate
 {
     /**
@@ -35,9 +37,13 @@ class Authenticate
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        if ($this->auth->guard($guard)->guest()) {
+        $token = $request->header("Authorization");
+        
+        if(!$data = AuthHelpers::jwtDecode($token)) {
             return response('Unauthorized.', 401);
         }
+    
+        $request->userId = $data->sub;
 
         return $next($request);
     }

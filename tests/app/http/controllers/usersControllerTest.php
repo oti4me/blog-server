@@ -3,6 +3,7 @@
 namespace Test\App\Http\Controllers;
 
 use App\Models\User;
+use Faker\Factory as Faker;
 
 class UsersControllerTest extends \TestCase
 {
@@ -13,10 +14,13 @@ class UsersControllerTest extends \TestCase
      */
     public function testUserSignupSuccess()
     {
+        $faker = Faker::create();
+        $email = $faker->email;
+
         $this->post('api/v1/signup', [
           "firstName" => "Henry",
           "lastName" => "Otighe",
-          "email" => "testmail@gmail.com",
+          "email" => $email,
           "password" => "jsonbourn",
           "phone" => "07067143161",
           "password_confirmation" => "jsonbourn"
@@ -25,7 +29,8 @@ class UsersControllerTest extends \TestCase
         $response = json_decode($this->response->getContent());
 
         $this->assertEquals(
-            $response->user->email, "testmail@gmail.com"
+            $response->user->email,
+            $email
         );
     }
 }
