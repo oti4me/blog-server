@@ -14,6 +14,28 @@ before_script:
   - npm install npm@latest -g
   - npm install -g jshint
   - npm install
+  - sudo apt-get install -y libpq-dev
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - php artisan migrate --force
+
+# after_success:
+#   - npm run coveralls
+#   - codeclimate-test-reporter < ./coverage/lcov.info
+
+services:
+  - postgresql
+
+addons:
+ postgresql: "9.6"
+ code_climate:
+   repo_token:
+     secure: 222d34eb55edbf96d5f154a8bebc765ca04abb766edf4b083653c0d1f60c6351
   
 script:
-  - vendor/bin/phpunit 
+  - vendor/bin/phpunit --coverage-clover coverage.xml
+
+after_script:
+  # upload coverage.xml file to Coveralls to analyze it
+  # minimal required coverage is set to 80+ %
+  - wget https://github.com/satooshi/php-coveralls/releases/download/v1.0.1/coveralls.phar
+  - php coveralls.phar --verbose

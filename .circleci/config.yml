@@ -70,3 +70,7 @@ jobs:
         
       # run tests!
       - run: ./vendor/bin/phpunit
+
+    #   - run:
+    #       name: Test Coverage Reporter
+    #       command: CODECLIMATE_REPO_TOKEN=$CODECLIMATE_REPO_TOKEN vendor/bin/test-reporter
