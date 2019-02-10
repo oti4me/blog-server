@@ -3,9 +3,42 @@ jobs:
   build:
     docker:
       - image: circleci/php:7.1-browsers
+        environment:
+          POSTGRES_HOST: "127.0.0.1"
+          CIRCLE_PROJECT_USERNAME: oti4me
+          CIRCLE_PROJECT_REPONAME: blog-server
+          TEST_DATABASE_URL: postgresql://ubuntu@localhost/circle_test?sslmode=disable
+          IMG_TAG: $(echo $CIRCLE_SHA1 | cut -c -7)
+          CACHE_DRIVER: file
+          JWT_SECRET: QAXtdcJNke12ObvtHN
+          APP_KEY: SomeRandomKey!!!
+          DB_CONNECTION: pgsql
+          APP_ENV: testing
+          APP_DEBUG: true
+          APP_KEY: kjcndjjksddwdwdw
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: circle_test
+          DB_USERNAME: ubuntu
+          DB_PASSWORD: ""
+          QUEUE_DRIVER: syn
+
+      - image: circleci/postgres:9.6
+        environment:
+          POSTGRES_USER: ubuntu
+          POSTGRES_DB: circle_test
+          POSTGRES_PASSWORD: ""
+
     working_directory: ~/repo
 
     steps:
+      - run:
+          name: Install PHP extensions
+          command: |
+              sudo apt-get install -y libpq-dev
+              sudo docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+              sudo docker-php-ext-install pdo pdo_pgsql pgsql
+
       - checkout
 
       # Download and cache dependencies
@@ -26,6 +59,14 @@ jobs:
           paths:
             - ./vendor
           key: v1-dependencies-{{ checksum "composer.json" }}
+
+      
+
+      - run: php -m
+
+      - run:
+          name: Migrate Laravel Database
+          command: php artisan migrate --env=testing --force
         
       # run tests!
       - run: ./vendor/bin/phpunit
