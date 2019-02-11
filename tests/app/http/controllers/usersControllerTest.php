@@ -17,7 +17,7 @@ class UsersControllerTest extends \TestCase
         $faker = Faker::create();
         $email = $faker->email;
 
-        $password = $faker->firstName;
+        $password = "avoidvalidationerror";
 
         $this->post('api/v1/signup', [
           "firstName" => $faker->firstName,

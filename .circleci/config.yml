@@ -35,11 +35,16 @@ jobs:
       - run:
           name: Install PHP extensions
           command: |
-              sudo apt-get install -y libpq-dev
-              sudo docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
-              sudo docker-php-ext-install pdo pdo_pgsql pgsql
+            sudo apt-get install -y libpq-dev
+            sudo docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+            sudo docker-php-ext-install pdo pdo_pgsql pgsql
+
+      - run:
+          name: Install Composer
+          command: curl -sS https://getcomposer.org/installer | sudo php  -- --install-dir=/usr/local/bin --filename=composer
 
       - checkout
+
 
       # Download and cache dependencies
       - restore_cache:
@@ -49,8 +54,11 @@ jobs:
           - v1-dependencies-
 
       - run:
-          name: Install Composer
-          command: curl -sS https://getcomposer.org/installer | sudo php  -- --install-dir=/usr/local/bin --filename=composer
+          name: Setup Code Climate test-reporter
+          command: |
+            # download test reporter as a static binary
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
 
       - run: composer install -n --prefer-dist
 
@@ -66,10 +74,17 @@ jobs:
 
       - run:
           name: Migrate Laravel Database
-          command: php artisan migrate --env=testing --force
+          command: php artisan migrate:refresh --env=testing --force
         
-      # run tests!
-      - run: ./vendor/bin/phpunit
+      # # run tests!
+      # - run: ./vendor/bin/phpunit
+
+      - run:
+          name: Run tests
+          command: |
+            ./cc-test-reporter before-build
+            ./vendor/bin/phpunit --coverage-clover clover.xml
+            ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
 
     #   - run:
     #       name: Test Coverage Reporter
